@@ -1,12 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
 export default function ToolItem({ tool }) {
   const Icon = tool.icon;
+  const navigate = useNavigate();
 
-  const handleToolClick = (e) => {
-    e.preventDefault();
-    // Phase 1 UI Prototype: Click does nothing for now
+  const handleToolClick = () => {
+    if (tool.route) {
+      navigate(tool.route);
+    }
   };
 
   return (
@@ -23,6 +26,11 @@ export default function ToolItem({ tool }) {
             <h4 className="text-sm font-semibold text-obsidian-text group-hover:text-white transition-colors duration-200 truncate">
               {tool.title}
             </h4>
+            {tool.status === 'ready' && (
+              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">
+                Active
+              </span>
+            )}
             {tool.status === 'beta' && (
               <span className="px-1.5 py-0.5 text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded">
                 Beta
