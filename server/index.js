@@ -7,11 +7,22 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Task 6: Log every incoming request
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] Incoming Request: ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // Force JSON content-type header on all /api routes
 app.use('/api', (req, res, next) => {
@@ -51,6 +62,7 @@ app.get('/api/health', async (req, res) => {
  * Extracts metadata for YouTube, Shorts, Live, and supported platforms
  */
 app.post('/api/video/analyze', async (req, res) => {
+  console.log('[API /api/video/analyze Triggered] Payload body:', req.body);
   try {
     const { url } = req.body;
 
@@ -71,7 +83,7 @@ app.post('/api/video/analyze', async (req, res) => {
     });
   } catch (error) {
     console.error('[Backend /api/video/analyze Exception]:', error);
-    
+
     const message = error.message || 'Failed to analyze video URL.';
     const isYtDlpMissing = message.includes('not installed');
     const statusCode = isYtDlpMissing ? 503 : 400;
@@ -153,8 +165,9 @@ app.post('/api/video/download', (req, res) => {
   }
 });
 
-// JSON 404 Handler - Guarantees JSON output with standardized error schema
+// JSON 404 Handler - Guarantees JSON output for any missing route
 app.use((req, res) => {
+  console.warn(`[Backend 404 Not Found]: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     error: {
@@ -164,7 +177,7 @@ app.use((req, res) => {
   });
 });
 
-// Global Express Error Handler - Guarantees JSON output on unexpected server errors
+// Global Express Error Handler - Guarantees JSON output on unexpected errors
 app.use((err, req, res, next) => {
   console.error('[Express Global Error Handler Exception]:', err);
   res.status(err.status || 500).json({
@@ -176,7 +189,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start Express Server
-app.listen(PORT, () => {
-  console.log(`🚀 Express server running on http://localhost:${PORT}`);
+// Start Express Server bound to 0.0.0.0
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Express server running on http://127.0.0.1:${PORT}`);
 });
