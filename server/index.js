@@ -18,9 +18,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Task 6: Log every incoming request
+// Tasks 1 & 2: Log every incoming request in detail
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] Incoming Request: ${req.method} ${req.originalUrl}`);
+  console.log(`\n==================================================`);
+  console.log(`[REQUEST] ${new Date().toISOString()}`);
+  console.log(`Method: ${req.method}`);
+  console.log(`URL: ${req.originalUrl}`);
+  console.log(`Headers: ${JSON.stringify(req.headers)}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    console.log(`Body: ${JSON.stringify(req.body)}`);
+  }
+  console.log(`==================================================\n`);
   next();
 });
 
@@ -35,25 +43,29 @@ app.use('/api', (req, res, next) => {
  * Health check & yt-dlp status verification
  */
 app.get('/api/health', async (req, res) => {
+  console.log('---> [ROUTE MATCHED] GET /api/health');
   try {
     const version = await checkYtDlpAvailable();
-    return res.json({
+    const responsePayload = {
       success: true,
       data: {
         status: 'ok',
         ytDlpVersion: version,
         timestamp: new Date().toISOString(),
       },
-    });
+    };
+    console.log('<--- [RESPONSE 200] GET /api/health:', JSON.stringify(responsePayload));
+    return res.json(responsePayload);
   } catch (err) {
-    console.error('[Backend /api/health Exception]:', err);
-    return res.status(503).json({
+    console.error('<--- [RESPONSE 503] GET /api/health Exception:', err);
+    const errorPayload = {
       success: false,
       error: {
-        message: 'yt-dlp is not installed on the server.',
+        message: err.message || 'yt-dlp is not installed on the server.',
         code: 'YT_DLP_MISSING',
       },
-    });
+    };
+    return res.status(503).json(errorPayload);
   }
 });
 
@@ -62,40 +74,69 @@ app.get('/api/health', async (req, res) => {
  * Extracts metadata for YouTube, Shorts, Live, and supported platforms
  */
 app.post('/api/video/analyze', async (req, res) => {
-  console.log('[API /api/video/analyze Triggered] Payload body:', req.body);
+  console.log('--------------------------------------------------');
+  console.log('---> [ROUTE MATCHED] POST /api/video/analyze');
+  console.log('---> Request Received for URL:', req.body?.url);
+  console.log('---> Full Request Body:', JSON.stringify(req.body));
+  console.log('--------------------------------------------------');
+
   try {
     const { url } = req.body;
 
     if (!url || typeof url !== 'string' || !url.trim()) {
-      return res.status(400).json({
+      const missingPayload = {
         success: false,
         error: {
           message: 'Please provide a valid video URL.',
           code: 'MISSING_URL',
         },
-      });
+      };
+      console.log('<--- [RESPONSE 400] Missing URL:', JSON.stringify(missingPayload));
+      return res.status(400).json(missingPayload);
     }
 
     const metadata = await extractVideoMetadata(url.trim());
-    return res.json({
+
+    const successPayload = {
       success: true,
       data: metadata,
-    });
+    };
+
+    console.log('--------------------------------------------------');
+    console.log('<--- [FINAL RESPONSE 200 SUCCESS]:', JSON.stringify({
+      success: true,
+      data: {
+        id: metadata.id,
+        title: metadata.title,
+        platform: metadata.platform,
+        durationFormatted: metadata.durationFormatted,
+        formatsCount: metadata.formats?.length,
+      }
+    }));
+    console.log('--------------------------------------------------');
+
+    return res.json(successPayload);
   } catch (error) {
-    console.error('[Backend /api/video/analyze Exception]:', error);
+    console.error('--------------------------------------------------');
+    console.error('<--- [FINAL RESPONSE ERROR EXCEPTION]:', error);
 
     const message = error.message || 'Failed to analyze video URL.';
     const isYtDlpMissing = message.includes('not installed');
     const statusCode = isYtDlpMissing ? 503 : 400;
     const errorCode = isYtDlpMissing ? 'YT_DLP_MISSING' : 'ANALYSIS_FAILED';
 
-    return res.status(statusCode).json({
+    const errorPayload = {
       success: false,
       error: {
         message,
         code: errorCode,
       },
-    });
+    };
+
+    console.error(`<--- [FINAL RESPONSE ${statusCode} ERROR]:`, JSON.stringify(errorPayload));
+    console.error('--------------------------------------------------');
+
+    return res.status(statusCode).json(errorPayload);
   }
 });
 
@@ -104,22 +145,25 @@ app.post('/api/video/analyze', async (req, res) => {
  * Initiates direct browser attachment download stream
  */
 app.get('/api/video/download', (req, res) => {
+  console.log('---> [ROUTE MATCHED] GET /api/video/download', req.query);
   try {
     const { url, formatId, title } = req.query;
 
     if (!url) {
-      return res.status(400).json({
+      const missingPayload = {
         success: false,
         error: {
           message: 'Missing video URL parameter.',
           code: 'MISSING_URL_PARAM',
         },
-      });
+      };
+      console.log('<--- [RESPONSE 400] Missing Download URL:', missingPayload);
+      return res.status(400).json(missingPayload);
     }
 
     streamVideoDownload(url, formatId, res, title || 'video');
   } catch (error) {
-    console.error('[Backend /api/video/download GET Exception]:', error);
+    console.error('<--- [RESPONSE 500] Download GET Exception:', error);
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
@@ -137,22 +181,24 @@ app.get('/api/video/download', (req, res) => {
  * Alternative POST endpoint for downloads
  */
 app.post('/api/video/download', (req, res) => {
+  console.log('---> [ROUTE MATCHED] POST /api/video/download', req.body);
   try {
     const { url, formatId, title } = req.body;
 
     if (!url) {
-      return res.status(400).json({
+      const missingPayload = {
         success: false,
         error: {
           message: 'Missing video URL parameter.',
           code: 'MISSING_URL_PARAM',
         },
-      });
+      };
+      return res.status(400).json(missingPayload);
     }
 
     streamVideoDownload(url, formatId, res, title || 'video');
   } catch (error) {
-    console.error('[Backend /api/video/download POST Exception]:', error);
+    console.error('<--- [RESPONSE 500] Download POST Exception:', error);
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
@@ -167,7 +213,7 @@ app.post('/api/video/download', (req, res) => {
 
 // JSON 404 Handler - Guarantees JSON output for any missing route
 app.use((req, res) => {
-  console.warn(`[Backend 404 Not Found]: ${req.method} ${req.originalUrl}`);
+  console.warn(`\n<--- [BACKEND 404 NOT FOUND]: ${req.method} ${req.originalUrl}\n`);
   res.status(404).json({
     success: false,
     error: {
@@ -179,7 +225,7 @@ app.use((req, res) => {
 
 // Global Express Error Handler - Guarantees JSON output on unexpected errors
 app.use((err, req, res, next) => {
-  console.error('[Express Global Error Handler Exception]:', err);
+  console.error('\n<--- [EXPRESS GLOBAL ERROR HANDLER EXCEPTION]:', err, '\n');
   res.status(err.status || 500).json({
     success: false,
     error: {
@@ -190,6 +236,10 @@ app.use((err, req, res, next) => {
 });
 
 // Start Express Server bound to 0.0.0.0
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Express server running on http://127.0.0.1:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`\n🚀 Express server running on http://127.0.0.1:${PORT} (bound to ${HOST})\n`);
+});
+
+server.on('error', (err) => {
+  console.error('[CRITICAL SERVER ERROR]: Could not start Express server:', err);
 });

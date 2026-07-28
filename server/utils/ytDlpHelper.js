@@ -5,11 +5,14 @@ import { execFile, spawn } from 'child_process';
  */
 export function checkYtDlpAvailable() {
   return new Promise((resolve, reject) => {
-    execFile('python', ['-m', 'yt_dlp', '--version'], (error, stdout) => {
+    console.log('---> [DIAGNOSTIC] Checking yt-dlp availability (python -m yt_dlp --version)...');
+    execFile('python', ['-m', 'yt_dlp', '--version'], (error, stdout, stderr) => {
       if (error) {
-        console.error('yt-dlp check failed:', error.message);
-        return reject(new Error('yt-dlp is not installed on the server.'));
+        console.error('---> [DIAGNOSTIC ERROR] yt-dlp check failed:', error.message);
+        console.error('---> [DIAGNOSTIC STDERR]:', stderr);
+        return reject(new Error(`yt-dlp is not installed or not executable on the server: ${error.message}`));
       }
+      console.log('---> [DIAGNOSTIC SUCCESS] yt-dlp version detected:', stdout.trim());
       resolve(stdout.trim());
     });
   });
@@ -79,14 +82,10 @@ export function detectPlatform(url = '', extractor = '') {
  * Extract metadata as structured object using yt-dlp
  */
 export async function extractVideoMetadata(videoUrl) {
-  // 1. Verify yt-dlp installation first
-  try {
-    await checkYtDlpAvailable();
-  } catch (err) {
-    throw new Error('yt-dlp is not installed on the server.');
-  }
+  // 1. Check yt-dlp executable first
+  await checkYtDlpAvailable();
 
-  // 2. Validate URL format syntax
+  // 2. Validate URL syntax
   try {
     const parsedUrl = new URL(videoUrl);
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
@@ -96,18 +95,22 @@ export async function extractVideoMetadata(videoUrl) {
     throw new Error('Invalid URL format. Please enter a valid HTTP or HTTPS video link.');
   }
 
-  // 3. Execute yt-dlp --dump-json
+  // 3. Execute yt-dlp command
   return new Promise((resolve, reject) => {
     const args = ['-m', 'yt_dlp', '-j', '--no-warnings', '--no-playlist', videoUrl];
+    const fullCommand = `python ${args.join(' ')}`;
+
+    console.log(`---> [yt-dlp EXECUTING]: ${fullCommand}`);
 
     execFile('python', args, { maxBuffer: 20 * 1024 * 1024 }, (error, stdout, stderr) => {
+      console.log(`---> [yt-dlp STDOUT LENGTH]: ${stdout ? stdout.length : 0} bytes`);
       if (stderr) {
-        console.error('[yt-dlp stderr]:', stderr);
+        console.log(`---> [yt-dlp STDERR]:\n${stderr}`);
       }
 
       if (error) {
-        console.error('[yt-dlp exec error]:', error.message);
-        let errorMsg = 'Failed to analyze video URL. Please verify the link.';
+        console.error(`---> [yt-dlp EXEC ERROR]:`, error);
+        let errorMsg = stderr ? stderr.trim() : error.message;
 
         const stderrText = (stderr || '').toLowerCase();
         if (stderrText.includes('unsupported url') || stderrText.includes('is not a valid url')) {
@@ -124,11 +127,14 @@ export async function extractVideoMetadata(videoUrl) {
       }
 
       try {
+        console.log('---> Parsing yt-dlp JSON stdout...');
         const metadata = JSON.parse(stdout);
         const platform = detectPlatform(videoUrl, metadata.extractor || '');
-        const isLive = Boolean(metadata.is_live || metadata.was_live && !metadata.duration);
+        const isLive = Boolean(metadata.is_live || (metadata.was_live && !metadata.duration));
 
-        // Extract formats list
+        console.log(`---> [METADATA PARSED] ID: ${metadata.id}, Title: "${metadata.title}"`);
+
+        // Format presets
         const formatsList = [];
         const rawFormats = metadata.formats || [];
         const maxResolution = metadata.height || (rawFormats.reduce((max, f) => Math.max(max, f.height || 0), 0)) || 1080;
@@ -155,7 +161,6 @@ export async function extractVideoMetadata(videoUrl) {
           }
         });
 
-        // Ensure at least "Best Quality" fallback
         if (formatsList.length === 0) {
           formatsList.push({
             formatId: 'best',
@@ -166,7 +171,6 @@ export async function extractVideoMetadata(videoUrl) {
           });
         }
 
-        // Add Audio MP3 preset
         const audioRaw = rawFormats.find((f) => f.vcodec === 'none' && (f.filesize || f.filesize_approx));
         formatsList.push({
           formatId: 'bestaudio/best',
@@ -189,8 +193,8 @@ export async function extractVideoMetadata(videoUrl) {
           formats: formatsList,
         });
       } catch (parseErr) {
-        console.error('[yt-dlp JSON parse error]:', parseErr);
-        reject(new Error('Failed to parse video metadata output from server.'));
+        console.error('---> [JSON PARSE ERROR]: Failed to parse yt-dlp output:', parseErr);
+        reject(new Error(`Failed to parse yt-dlp JSON output: ${parseErr.message}`));
       }
     });
   });
@@ -205,6 +209,8 @@ export function streamVideoDownload(videoUrl, formatId, res, customTitle = 'vide
   const isAudio = (formatId || '').includes('audio');
   const ext = isAudio ? 'mp3' : 'mp4';
   const filename = `${cleanTitle}.${ext}`;
+
+  console.log(`---> [DOWNLOAD STREAM START] File: "${filename}", formatId: "${formatId}"`);
 
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('Content-Type', isAudio ? 'audio/mpeg' : 'video/mp4');
@@ -228,17 +234,24 @@ export function streamVideoDownload(videoUrl, formatId, res, customTitle = 'vide
   dlProcess.stdout.pipe(res);
 
   dlProcess.stderr.on('data', (data) => {
-    console.log(`[yt-dlp stream log]: ${data.toString().trim()}`);
+    console.log(`---> [yt-dlp download log]: ${data.toString().trim()}`);
   });
 
   dlProcess.on('error', (err) => {
-    console.error('[yt-dlp spawn error]:', err);
+    console.error('---> [download spawn error]:', err);
     if (!res.headersSent) {
-      res.status(500).json({ success: false, error: 'Failed to start download stream.' });
+      res.status(500).json({
+        success: false,
+        error: {
+          message: `Failed to start download stream: ${err.message}`,
+          code: 'SPAWN_ERROR'
+        }
+      });
     }
   });
 
   res.on('close', () => {
+    console.log(`---> [DOWNLOAD STREAM CLOSED] Client disconnected for file: "${filename}"`);
     dlProcess.kill();
   });
 }
