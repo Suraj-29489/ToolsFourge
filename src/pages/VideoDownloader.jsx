@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   Film,
   Music,
-  Share2
+  Share2,
+  Radio
 } from 'lucide-react';
 
 export default function VideoDownloader() {
@@ -23,16 +24,17 @@ export default function VideoDownloader() {
   const [videoData, setVideoData] = useState(null);
   const [downloadingFormatId, setDownloadingFormatId] = useState(null);
 
-  // Supported Platform Badges
+  // Platform Support Badges
   const platforms = [
-    { name: 'YouTube', color: '#ff0000', icon: Film },
+    { name: 'YouTube & Shorts', color: '#ff0000', icon: Film },
+    { name: 'YouTube Live', color: '#ff4e45', icon: Radio },
     { name: 'Instagram', color: '#e1306c', icon: Share2 },
     { name: 'TikTok', color: '#00f2fe', icon: Video },
     { name: 'Facebook', color: '#1877f2', icon: Film },
     { name: 'X (Twitter)', color: '#1da1f2', icon: Share2 },
   ];
 
-  // Clipboard Paste handler
+  // Paste from clipboard
   const handlePaste = async () => {
     try {
       const text = await navigator.clipboard.readText();
@@ -41,15 +43,16 @@ export default function VideoDownloader() {
         setError(null);
       }
     } catch (err) {
-      console.error('Clipboard access denied:', err);
+      console.error('Clipboard access error:', err);
     }
   };
 
   // Analyze Video URL
   const handleAnalyze = async (e) => {
     if (e) e.preventDefault();
-    if (!url.trim()) {
-      setError('Please paste or enter a valid video URL first.');
+    
+    if (!url || !url.trim()) {
+      setError('Please enter or paste a video URL first.');
       return;
     }
 
@@ -60,26 +63,35 @@ export default function VideoDownloader() {
     try {
       const response = await fetch('/api/video/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: JSON.stringify({ url: url.trim() }),
       });
+
+      // Task 9: Content-Type validation before response.json()
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('The server returned an unexpected response.');
+      }
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to analyze video URL.');
+        throw new Error(result.error || 'Failed to analyze video link.');
       }
 
       setVideoData(result.data);
     } catch (err) {
-      console.error('Analysis error:', err);
-      setError(err.message || 'Unable to connect to the video processing server.');
+      console.error('[VideoDownloader Error]:', err);
+      setError(err.message || 'An unexpected error occurred while processing the request.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Trigger File Stream Download
+  // Initiate Download
   const handleDownload = (format) => {
     if (!videoData || !url) return;
 
@@ -91,17 +103,16 @@ export default function VideoDownloader() {
       videoData.title
     )}`;
 
-    // Trigger browser download window
     window.location.href = downloadUrl;
 
     setTimeout(() => {
       setDownloadingFormatId(null);
-    }, 3000);
+    }, 3500);
   };
 
   return (
     <main className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      {/* Top Back Navigation Breadcrumb */}
+      {/* Top Breadcrumb Navigation */}
       <div className="mb-6">
         <Link
           to="/"
@@ -121,7 +132,7 @@ export default function VideoDownloader() {
           Video Downloader
         </h1>
         <p className="text-sm sm:text-base text-obsidian-text-muted mt-2 max-w-xl mx-auto">
-          Download high-quality videos and audio clips in MP4 & MP3 formats from supported platforms.
+          Fast metadata extraction and high-speed MP4 & MP3 downloads for YouTube, Shorts, Live streams, and major platforms.
         </p>
 
         {/* Platform Support Badges */}
@@ -141,7 +152,7 @@ export default function VideoDownloader() {
         </div>
       </div>
 
-      {/* Large URL Input Bar Container */}
+      {/* Large Input Bar */}
       <div className="bg-obsidian-card border border-obsidian-border rounded-2xl p-4 sm:p-6 shadow-xl mb-8">
         <form onSubmit={handleAnalyze} className="flex flex-col sm:flex-row items-center gap-3">
           <div className="relative flex-1 w-full">
@@ -149,10 +160,9 @@ export default function VideoDownloader() {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste video link here (e.g. YouTube, Instagram, TikTok...)"
+              placeholder="Paste video link (YouTube, Shorts, Live, Instagram, TikTok...)"
               className="w-full bg-obsidian-secondary border border-obsidian-border rounded-xl px-4 py-3.5 pr-24 text-sm text-obsidian-text placeholder-obsidian-text-muted/60 focus:outline-none focus:border-obsidian-accent focus:ring-1 focus:ring-obsidian-accent transition-all duration-200"
             />
-            {/* Paste Button inside input */}
             <button
               type="button"
               onClick={handlePaste}
@@ -163,7 +173,6 @@ export default function VideoDownloader() {
             </button>
           </div>
 
-          {/* Analyze Button */}
           <button
             type="submit"
             disabled={loading}
@@ -184,12 +193,12 @@ export default function VideoDownloader() {
         </form>
       </div>
 
-      {/* Error Alert State */}
+      {/* Error State Banner */}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 sm:p-5 mb-8 flex items-start space-x-3.5 animate-fade-in">
           <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-bold text-red-300">Analysis Failed</h4>
+            <h4 className="text-sm font-bold text-red-300">Analysis Error</h4>
             <p className="text-xs text-red-300/80 mt-1 leading-relaxed">{error}</p>
           </div>
         </div>
@@ -200,15 +209,15 @@ export default function VideoDownloader() {
         <div className="bg-obsidian-card border border-obsidian-border rounded-2xl p-8 text-center animate-pulse mb-8">
           <Loader2 className="w-10 h-10 text-obsidian-accent animate-spin mx-auto mb-3" />
           <p className="text-sm font-semibold text-obsidian-text">
-            Fetching video streams & format information...
+            Extracting video metadata & streaming options...
           </p>
           <p className="text-xs text-obsidian-text-muted mt-1">
-            Please wait while yt-dlp analyzes the link.
+            Communicating with backend server via JSON API.
           </p>
         </div>
       )}
 
-      {/* Analyzed Metadata & Download Options */}
+      {/* Analyzed Metadata & Download Cards */}
       {videoData && (
         <div className="space-y-8 animate-fade-in">
           {/* Main Video Information Banner */}
@@ -230,10 +239,19 @@ export default function VideoDownloader() {
                 </div>
               )}
 
-              {/* Duration Badge */}
-              <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/80 backdrop-blur text-[11px] font-mono font-medium text-white flex items-center space-x-1">
-                <Clock className="w-3 h-3 text-obsidian-accent" />
-                <span>{videoData.durationFormatted}</span>
+              {/* Duration / LIVE Badge */}
+              <div className="absolute bottom-2 right-2 px-2.5 py-1 rounded bg-black/80 backdrop-blur text-[11px] font-mono font-medium text-white flex items-center space-x-1">
+                {videoData.isLive ? (
+                  <>
+                    <Radio className="w-3 h-3 text-red-500 animate-pulse" />
+                    <span className="text-red-400 font-bold">LIVE STREAM</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="w-3 h-3 text-obsidian-accent" />
+                    <span>{videoData.durationFormatted}</span>
+                  </>
+                )}
               </div>
 
               {/* Platform Tag */}
@@ -242,7 +260,7 @@ export default function VideoDownloader() {
               </div>
             </div>
 
-            {/* Details */}
+            {/* Video Details */}
             <div className="flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-obsidian-text leading-snug line-clamp-2">
@@ -255,22 +273,22 @@ export default function VideoDownloader() {
                   </span>
                   <span className="flex items-center space-x-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Metadata verified</span>
+                    <span>JSON Metadata Verified</span>
                   </span>
                 </div>
               </div>
 
               <div className="mt-4 pt-4 border-t border-obsidian-border/60 text-xs text-obsidian-text-muted">
-                Select your preferred quality or audio format below to initiate instant download.
+                Select your desired video resolution or audio MP3 stream below to start download.
               </div>
             </div>
           </div>
 
-          {/* Download Quality Cards Grid */}
+          {/* Download Quality Options */}
           <div>
             <h4 className="text-base font-bold text-obsidian-text mb-4 flex items-center space-x-2">
               <Download className="w-4 h-4 text-obsidian-accent" />
-              <span>Available Download Options</span>
+              <span>Download Options</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
