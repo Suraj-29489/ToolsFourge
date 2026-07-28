@@ -35,9 +35,13 @@ app.get('/api/health', async (req, res) => {
       },
     });
   } catch (err) {
+    console.error('[Backend /api/health Exception]:', err);
     return res.status(503).json({
       success: false,
-      error: 'yt-dlp is not installed on the server.',
+      error: {
+        message: 'yt-dlp is not installed on the server.',
+        code: 'YT_DLP_MISSING',
+      },
     });
   }
 });
@@ -53,7 +57,10 @@ app.post('/api/video/analyze', async (req, res) => {
     if (!url || typeof url !== 'string' || !url.trim()) {
       return res.status(400).json({
         success: false,
-        error: 'Please provide a valid video URL.',
+        error: {
+          message: 'Please provide a valid video URL.',
+          code: 'MISSING_URL',
+        },
       });
     }
 
@@ -63,11 +70,19 @@ app.post('/api/video/analyze', async (req, res) => {
       data: metadata,
     });
   } catch (error) {
-    console.error('[API /api/video/analyze error]:', error.message);
-    const status = error.message.includes('not installed') ? 503 : 400;
-    return res.status(status).json({
+    console.error('[Backend /api/video/analyze Exception]:', error);
+    
+    const message = error.message || 'Failed to analyze video URL.';
+    const isYtDlpMissing = message.includes('not installed');
+    const statusCode = isYtDlpMissing ? 503 : 400;
+    const errorCode = isYtDlpMissing ? 'YT_DLP_MISSING' : 'ANALYSIS_FAILED';
+
+    return res.status(statusCode).json({
       success: false,
-      error: error.message || 'Failed to extract video details.',
+      error: {
+        message,
+        code: errorCode,
+      },
     });
   }
 });
@@ -83,17 +98,23 @@ app.get('/api/video/download', (req, res) => {
     if (!url) {
       return res.status(400).json({
         success: false,
-        error: 'Missing video URL parameter.',
+        error: {
+          message: 'Missing video URL parameter.',
+          code: 'MISSING_URL_PARAM',
+        },
       });
     }
 
     streamVideoDownload(url, formatId, res, title || 'video');
   } catch (error) {
-    console.error('[API /api/video/download error]:', error.message);
+    console.error('[Backend /api/video/download GET Exception]:', error);
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
-        error: 'Error initiating video download stream.',
+        error: {
+          message: 'Error initiating video download stream.',
+          code: 'DOWNLOAD_FAILED',
+        },
       });
     }
   }
@@ -110,36 +131,48 @@ app.post('/api/video/download', (req, res) => {
     if (!url) {
       return res.status(400).json({
         success: false,
-        error: 'Missing video URL parameter.',
+        error: {
+          message: 'Missing video URL parameter.',
+          code: 'MISSING_URL_PARAM',
+        },
       });
     }
 
     streamVideoDownload(url, formatId, res, title || 'video');
   } catch (error) {
-    console.error('[API /api/video/download POST error]:', error.message);
+    console.error('[Backend /api/video/download POST Exception]:', error);
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
-        error: 'Error initiating video download stream.',
+        error: {
+          message: 'Error initiating video download stream.',
+          code: 'DOWNLOAD_FAILED',
+        },
       });
     }
   }
 });
 
-// JSON 404 Handler - Guarantees JSON output instead of HTML 404 pages
+// JSON 404 Handler - Guarantees JSON output with standardized error schema
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    error: `Endpoint '${req.originalUrl}' was not found on this server.`,
+    error: {
+      message: `Endpoint '${req.originalUrl}' was not found on this server.`,
+      code: 'NOT_FOUND',
+    },
   });
 });
 
-// Global Express Error Handler - Guarantees JSON output on unexpected errors
+// Global Express Error Handler - Guarantees JSON output on unexpected server errors
 app.use((err, req, res, next) => {
-  console.error('[Express Global Error Handler]:', err);
+  console.error('[Express Global Error Handler Exception]:', err);
   res.status(err.status || 500).json({
     success: false,
-    error: err.message || 'Internal Server Error.',
+    error: {
+      message: err.message || 'Internal Server Error.',
+      code: 'INTERNAL_ERROR',
+    },
   });
 });
 

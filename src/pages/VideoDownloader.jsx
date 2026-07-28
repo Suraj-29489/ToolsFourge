@@ -17,10 +17,47 @@ import {
   Radio
 } from 'lucide-react';
 
+/**
+ * Safely extracts a plain string message from any error or API response object.
+ * NEVER returns an object. Guarantees string output for React rendering.
+ */
+function extractErrorMessage(input) {
+  if (!input) {
+    return 'Something went wrong while analyzing the video.';
+  }
+
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  if (input instanceof Error) {
+    return input.message || 'Something went wrong while analyzing the video.';
+  }
+
+  if (typeof input === 'object') {
+    // Check input.error.message schema
+    if (input.error && typeof input.error === 'object' && typeof input.error.message === 'string') {
+      return input.error.message;
+    }
+
+    // Check input.error string schema
+    if (typeof input.error === 'string') {
+      return input.error;
+    }
+
+    // Check input.message string schema
+    if (typeof input.message === 'string') {
+      return input.message;
+    }
+  }
+
+  return 'Something went wrong while analyzing the video.';
+}
+
 export default function VideoDownloader() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // ALWAYS a string or null
   const [videoData, setVideoData] = useState(null);
   const [downloadingFormatId, setDownloadingFormatId] = useState(null);
 
@@ -43,14 +80,14 @@ export default function VideoDownloader() {
         setError(null);
       }
     } catch (err) {
-      console.error('Clipboard access error:', err);
+      console.error('[Clipboard Access Error]:', err);
     }
   };
 
   // Analyze Video URL
   const handleAnalyze = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!url || !url.trim()) {
       setError('Please enter or paste a video URL first.');
       return;
@@ -70,7 +107,7 @@ export default function VideoDownloader() {
         body: JSON.stringify({ url: url.trim() }),
       });
 
-      // Task 9: Content-Type validation before response.json()
+      // Verify JSON Content-Type before parsing
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         throw new Error('The server returned an unexpected response.');
@@ -78,20 +115,29 @@ export default function VideoDownloader() {
 
       const result = await response.json();
 
+      // Console logging requirement (Task 5)
+      console.log('[Frontend API Analyze Response]:', result);
+
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to analyze video link.');
+        const errorMsg = extractErrorMessage(result);
+        throw new Error(errorMsg);
+      }
+
+      if (!result.data || typeof result.data !== 'object') {
+        throw new Error('Something went wrong while analyzing the video.');
       }
 
       setVideoData(result.data);
     } catch (err) {
-      console.error('[VideoDownloader Error]:', err);
-      setError(err.message || 'An unexpected error occurred while processing the request.');
+      console.error('[Frontend Analysis Exception]:', err);
+      const safeMsg = extractErrorMessage(err);
+      setError(safeMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initiate Download
+  // Initiate Download Stream
   const handleDownload = (format) => {
     if (!videoData || !url) return;
 
@@ -193,13 +239,15 @@ export default function VideoDownloader() {
         </form>
       </div>
 
-      {/* Error State Banner */}
+      {/* Error State Banner (Guaranteed string rendering) */}
       {error && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 sm:p-5 mb-8 flex items-start space-x-3.5 animate-fade-in">
           <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
           <div>
             <h4 className="text-sm font-bold text-red-300">Analysis Error</h4>
-            <p className="text-xs text-red-300/80 mt-1 leading-relaxed">{error}</p>
+            <p className="text-xs text-red-300/80 mt-1 leading-relaxed">
+              {typeof error === 'string' ? error : 'Something went wrong while analyzing the video.'}
+            </p>
           </div>
         </div>
       )}
