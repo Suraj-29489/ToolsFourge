@@ -54,6 +54,11 @@ import AudioSpeedPage from './pages/tools/audio/AudioSpeedPage';
 // Text Tools
 import TextCaseConverter from './pages/tools/text/TextCaseConverter';
 import CsvJsonConverter from './pages/tools/text/CsvJsonConverter';
+import MarkdownPreviewPage from './pages/tools/text/MarkdownPreviewPage';
+import HtmlPreviewPage from './pages/tools/text/HtmlPreviewPage';
+import LoremIpsumPage from './pages/tools/text/LoremIpsumPage';
+import XmlFormatterPage from './pages/tools/text/XmlFormatterPage';
+import CsvViewerPage from './pages/tools/text/CsvViewerPage';
 
 // Security Tools
 import HashGenerator from './pages/tools/security/HashGenerator';
@@ -131,6 +136,11 @@ export default function App() {
             {/* Text Tools */}
             <Route path="/tools/text-case-converter" element={<TextCaseConverter />} />
             <Route path="/tools/csv-json-converter" element={<CsvJsonConverter />} />
+            <Route path="/tools/markdown-preview" element={<MarkdownPreviewPage />} />
+            <Route path="/tools/html-preview" element={<HtmlPreviewPage />} />
+            <Route path="/tools/lorem-ipsum-generator" element={<LoremIpsumPage />} />
+            <Route path="/tools/xml-formatter" element={<XmlFormatterPage />} />
+            <Route path="/tools/csv-viewer" element={<CsvViewerPage />} />
 
             {/* Security Tools */}
             <Route path="/tools/hash-generator" element={<HashGenerator />} />
