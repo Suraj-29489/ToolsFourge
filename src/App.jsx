@@ -66,9 +66,18 @@ import JwtDecoder from './pages/tools/security/JwtDecoder';
 
 // Developer Tools
 import ColorConverter from './pages/tools/developer/ColorConverter';
+import CronGeneratorPage from './pages/tools/developer/CronGeneratorPage';
+import RegexTesterPage from './pages/tools/developer/RegexTesterPage';
 
 // Creative Tools
 import CssGenerators from './pages/tools/creative/CssGenerators';
+import SignatureGeneratorPage from './pages/tools/creative/SignatureGeneratorPage';
+import AvatarGeneratorPage from './pages/tools/creative/AvatarGeneratorPage';
+import MemeGeneratorPage from './pages/tools/creative/MemeGeneratorPage';
+
+// Social Tools
+import YouTubeThumbnailPage from './pages/tools/social/YouTubeThumbnailPage';
+import SocialPreviewPage from './pages/tools/social/SocialPreviewPage';
 
 // Utility Tools
 import QrGenerator from './pages/tools/utilities/QrGenerator';
@@ -81,6 +90,8 @@ import WordCounter from './pages/tools/utilities/WordCounter';
 import TextCompare from './pages/tools/utilities/TextCompare';
 import UnitConverter from './pages/tools/utilities/UnitConverter';
 import CalculatorsSuite from './pages/tools/utilities/CalculatorsSuite';
+import RandomGeneratorsPage from './pages/tools/utilities/RandomGeneratorsPage';
+import StopwatchTimerPage from './pages/tools/utilities/StopwatchTimerPage';
 
 export default function App() {
   return (
@@ -148,9 +159,18 @@ export default function App() {
 
             {/* Developer Tools */}
             <Route path="/tools/color-converter" element={<ColorConverter />} />
+            <Route path="/tools/cron-generator" element={<CronGeneratorPage />} />
+            <Route path="/tools/regex-tester" element={<RegexTesterPage />} />
 
             {/* Creative Tools */}
             <Route path="/tools/css-generators" element={<CssGenerators />} />
+            <Route path="/tools/digital-signature" element={<SignatureGeneratorPage />} />
+            <Route path="/tools/avatar-generator" element={<AvatarGeneratorPage />} />
+            <Route path="/tools/meme-generator" element={<MemeGeneratorPage />} />
+
+            {/* Social Tools */}
+            <Route path="/tools/youtube-thumbnail" element={<YouTubeThumbnailPage />} />
+            <Route path="/tools/social-preview" element={<SocialPreviewPage />} />
 
             {/* Utility Tools */}
             <Route path="/tools/qr-generator" element={<QrGenerator />} />
@@ -163,6 +183,8 @@ export default function App() {
             <Route path="/tools/text-compare" element={<TextCompare />} />
             <Route path="/tools/unit-converter" element={<UnitConverter />} />
             <Route path="/tools/calculators" element={<CalculatorsSuite />} />
+            <Route path="/tools/random-generators" element={<RandomGeneratorsPage />} />
+            <Route path="/tools/stopwatch-timer" element={<StopwatchTimerPage />} />
 
             {/* Video Tools */}
             <Route path="/tools/video-downloader" element={<VideoDownloader />} />
