@@ -21,14 +21,14 @@
   <body class="bg-obsidian-bg text-obsidian-text font-sans antialiased min-h-screen selection:bg-obsidian-accent selection:text-white">
     <div id="root"></div>
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').then(
             (registration) => {
-              console.log('Daily Tools SW registered: ', registration.scope);
+              console.log('Daily Tools SW registered:', registration.scope);
             },
             (err) => {
-              console.log('Daily Tools SW registration failed: ', err);
+              console.warn('Daily Tools SW registration notice:', err);
             }
           );
         });
