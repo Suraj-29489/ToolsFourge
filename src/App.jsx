@@ -13,6 +13,7 @@ import PdfToImages from './pages/tools/pdf/PdfToImages';
 import UnlockPdf from './pages/tools/pdf/UnlockPdf';
 
 // Image Tools
+import AiImageUpscaler from './pages/tools/image/AiImageUpscaler';
 import ImageConverter from './pages/tools/image/ImageConverter';
 import ResizeImage from './pages/tools/image/ResizeImage';
 import CropImage from './pages/tools/image/CropImage';
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/tools/watermark-pdf" element={<RotatePdf />} />
 
             {/* Image Tools */}
+            <Route path="/tools/ai-image-upscaler" element={<AiImageUpscaler />} />
             <Route path="/tools/jpg-to-png" element={<ImageConverter targetFormat="png" defaultTitle="JPG to PNG Converter" />} />
             <Route path="/tools/png-to-jpg" element={<ImageConverter targetFormat="jpeg" defaultTitle="PNG to JPG Converter" />} />
             <Route path="/tools/webp-to-png" element={<ImageConverter targetFormat="png" defaultTitle="WEBP to PNG Converter" />} />

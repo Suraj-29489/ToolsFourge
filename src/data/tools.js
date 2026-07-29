@@ -170,6 +170,16 @@ export const toolsByCategory = {
 
   [CATEGORY_IDS.IMAGE]: [
     {
+      id: 'ai-image-upscaler',
+      title: 'AI Image Upscaler',
+      description: 'Enhance image resolution up to 4x using browser AI',
+      route: '/tools/ai-image-upscaler',
+      icon: Sparkles,
+      status: 'ready',
+      featured: true,
+      category: CATEGORY_IDS.IMAGE,
+    },
+    {
       id: 'jpg-to-png',
       title: 'JPG to PNG',
       description: 'Convert JPG images to transparent PNG format',
