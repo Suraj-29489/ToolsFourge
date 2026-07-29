@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CategoryCard from '../components/cards/CategoryCard';
 import Accordion from '../components/accordion/Accordion';
+import UpcomingToolsSection from '../components/home/UpcomingToolsSection';
 import { categories, toolsByCategory } from '../data/tools';
 
 export default function Home() {
@@ -87,6 +88,9 @@ export default function Home() {
           );
         })}
       </div>
+
+      {/* Upcoming Premium Tools Section */}
+      <UpcomingToolsSection />
     </main>
   );
 }
