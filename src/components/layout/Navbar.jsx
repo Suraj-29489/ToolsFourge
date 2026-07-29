@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import InstallPwaButton from '../pwa/InstallPwaButton';
 
 export default function Navbar() {
   return (
@@ -33,8 +34,10 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Right side intentionally left empty */}
-        <div></div>
+        {/* Right Side: Install PWA Button */}
+        <div>
+          <InstallPwaButton />
+        </div>
       </div>
     </header>
   );

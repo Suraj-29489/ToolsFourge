@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
+import PwaUpdateBanner from './components/pwa/PwaUpdateBanner';
 
 // Video Tools
 import VideoDownloader from './pages/VideoDownloader';
@@ -202,6 +203,7 @@ export default function App() {
             <Route path="*" element={<Home />} />
           </Routes>
         </div>
+        <PwaUpdateBanner />
         <footer className="py-6 border-t border-obsidian-border/50 text-center text-xs text-obsidian-text-muted">
           <p>ToolsFourge &copy; {new Date().getFullYear()} &bull; 100% Client-Side Web Utilities</p>
         </footer>

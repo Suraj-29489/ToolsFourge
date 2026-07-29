@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daily Tools - Modern Online Utility Suite</title>
     <meta name="description" content="Fast, clean, and modern web utilities for PDF, image, video, audio processing, and developer productivity tools." />
+    <meta name="theme-color" content="#8b5cf6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon.svg" />
     <!-- Preconnect Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +18,20 @@
   </head>
   <body class="bg-obsidian-bg text-obsidian-text font-sans antialiased min-h-screen selection:bg-obsidian-accent selection:text-white">
     <div id="root"></div>
-    <script type="module" href="/src/main.jsx" src="/src/main.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(
+            (registration) => {
+              console.log('Daily Tools SW registered: ', registration.scope);
+            },
+            (err) => {
+              console.log('Daily Tools SW registration failed: ', err);
+            }
+          );
+        });
+      }
+    </script>
   </body>
 </html>
