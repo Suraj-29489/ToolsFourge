@@ -23,6 +23,12 @@ import CropImage from './pages/tools/image/CropImage';
 import CompressImage from './pages/tools/image/CompressImage';
 import ImageToIco from './pages/tools/image/ImageToIco';
 import ImageFilters from './pages/tools/image/ImageFilters';
+import ColorPaletteExtractor from './pages/tools/image/ColorPaletteExtractor';
+import ImageCollageMaker from './pages/tools/image/ImageCollageMaker';
+import BorderGenerator from './pages/tools/image/BorderGenerator';
+import ImageMetadataViewer from './pages/tools/image/ImageMetadataViewer';
+import SvgToPng from './pages/tools/image/SvgToPng';
+import PixelateImage from './pages/tools/image/PixelateImage';
 
 // Audio Tools
 import TrimAudio from './pages/tools/audio/TrimAudio';
@@ -89,6 +95,12 @@ export default function App() {
             <Route path="/tools/compress-image" element={<CompressImage />} />
             <Route path="/tools/image-to-ico" element={<ImageToIco />} />
             <Route path="/tools/image-filters" element={<ImageFilters />} />
+            <Route path="/tools/color-palette-extractor" element={<ColorPaletteExtractor />} />
+            <Route path="/tools/image-collage-maker" element={<ImageCollageMaker />} />
+            <Route path="/tools/border-generator" element={<BorderGenerator />} />
+            <Route path="/tools/image-metadata-viewer" element={<ImageMetadataViewer />} />
+            <Route path="/tools/svg-to-png" element={<SvgToPng />} />
+            <Route path="/tools/pixelate-image" element={<PixelateImage />} />
 
             {/* Audio Tools */}
             <Route path="/tools/trim-audio" element={<TrimAudio />} />
