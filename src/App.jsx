@@ -2,7 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
+
+// Video Tools
 import VideoDownloader from './pages/VideoDownloader';
+import VideoCompressorPage from './pages/tools/video/VideoCompressorPage';
+import VideoTrimmerPage from './pages/tools/video/VideoTrimmerPage';
+import ConvertVideoPage from './pages/tools/video/ConvertVideoPage';
+import MuteVideoPage from './pages/tools/video/MuteVideoPage';
+import VideoSpeedPage from './pages/tools/video/VideoSpeedPage';
+import ReverseVideoPage from './pages/tools/video/ReverseVideoPage';
+import ThumbnailGeneratorPage from './pages/tools/video/ThumbnailGeneratorPage';
+import GifMakerPage from './pages/tools/video/GifMakerPage';
 
 // PDF Tools
 import MergePdf from './pages/tools/pdf/MergePdf';
@@ -138,6 +148,15 @@ export default function App() {
 
             {/* Video Tools */}
             <Route path="/tools/video-downloader" element={<VideoDownloader />} />
+            <Route path="/tools/video-compressor" element={<VideoCompressorPage />} />
+            <Route path="/tools/trim-video" element={<VideoTrimmerPage />} />
+            <Route path="/tools/convert-video" element={<ConvertVideoPage />} />
+            <Route path="/tools/extract-audio-video" element={<Mp3Converter />} />
+            <Route path="/tools/mute-video" element={<MuteVideoPage />} />
+            <Route path="/tools/video-speed" element={<VideoSpeedPage />} />
+            <Route path="/tools/reverse-video" element={<ReverseVideoPage />} />
+            <Route path="/tools/thumbnail-generator" element={<ThumbnailGeneratorPage />} />
+            <Route path="/tools/gif-maker" element={<GifMakerPage />} />
 
             {/* Fallback */}
             <Route path="*" element={<Home />} />
