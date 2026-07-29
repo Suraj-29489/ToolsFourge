@@ -599,7 +599,7 @@ export const toolsByCategory = {
       title: 'Audio Compressor',
       description: 'Reduce audio file sizes with optimal bitrate settings',
       route: '/tools/audio-compressor',
-      icon: AudioCompressor,
+      icon: FileArchive,
       status: 'ready',
       featured: false,
       category: CATEGORY_IDS.AUDIO,
