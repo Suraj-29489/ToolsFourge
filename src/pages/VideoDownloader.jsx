@@ -16,6 +16,7 @@ import {
   Share2,
   Radio
 } from 'lucide-react';
+import API_BASE from '../config/api';
 
 /**
  * Safely extracts a plain string message from any error or API response object.
@@ -98,13 +99,12 @@ export default function VideoDownloader() {
     setVideoData(null);
 
     try {
-      const response = await fetch('/api/video/analyze', {
+      const response = await fetch(`${API_BASE}/api/video/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url }),
       });
 
       // Verify JSON Content-Type before parsing
@@ -115,7 +115,7 @@ export default function VideoDownloader() {
 
       const result = await response.json();
 
-      // Console logging requirement (Task 5)
+      // Console logging requirement
       console.log('[Frontend API Analyze Response]:', result);
 
       if (!response.ok || !result.success) {
@@ -143,7 +143,7 @@ export default function VideoDownloader() {
 
     setDownloadingFormatId(format.formatId);
 
-    const downloadUrl = `/api/video/download?url=${encodeURIComponent(
+    const downloadUrl = `${API_BASE}/api/video/download?url=${encodeURIComponent(
       url
     )}&formatId=${encodeURIComponent(format.formatId)}&title=${encodeURIComponent(
       videoData.title
