@@ -46,6 +46,10 @@ import MergeAudio from './pages/tools/audio/MergeAudio';
 import VolumeBooster from './pages/tools/audio/VolumeBooster';
 import AudioCompressor from './pages/tools/audio/AudioCompressor';
 import Mp3Converter from './pages/tools/audio/Mp3Converter';
+import VoiceRecorderPage from './pages/tools/audio/VoiceRecorderPage';
+import AudioVisualizerPage from './pages/tools/audio/AudioVisualizerPage';
+import ReverseAudioPage from './pages/tools/audio/ReverseAudioPage';
+import AudioSpeedPage from './pages/tools/audio/AudioSpeedPage';
 
 // Text Tools
 import TextCaseConverter from './pages/tools/text/TextCaseConverter';
@@ -119,6 +123,10 @@ export default function App() {
             <Route path="/tools/audio-compressor" element={<AudioCompressor />} />
             <Route path="/tools/mp3-converter" element={<Mp3Converter />} />
             <Route path="/tools/extract-audio" element={<Mp3Converter />} />
+            <Route path="/tools/voice-recorder" element={<VoiceRecorderPage />} />
+            <Route path="/tools/audio-visualizer" element={<AudioVisualizerPage />} />
+            <Route path="/tools/reverse-audio" element={<ReverseAudioPage />} />
+            <Route path="/tools/audio-speed" element={<AudioSpeedPage />} />
 
             {/* Text Tools */}
             <Route path="/tools/text-case-converter" element={<TextCaseConverter />} />
