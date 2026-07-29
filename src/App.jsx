@@ -11,6 +11,9 @@ import RotatePdf from './pages/tools/pdf/RotatePdf';
 import ImagesToPdf from './pages/tools/pdf/ImagesToPdf';
 import PdfToImages from './pages/tools/pdf/PdfToImages';
 import UnlockPdf from './pages/tools/pdf/UnlockPdf';
+import PdfPageNumbering from './pages/tools/pdf/PdfPageNumbering';
+import DeletePdfPages from './pages/tools/pdf/DeletePdfPages';
+import ProtectPdf from './pages/tools/pdf/ProtectPdf';
 
 // Image Tools
 import AiImageUpscaler from './pages/tools/image/AiImageUpscaler';
@@ -19,6 +22,7 @@ import ResizeImage from './pages/tools/image/ResizeImage';
 import CropImage from './pages/tools/image/CropImage';
 import CompressImage from './pages/tools/image/CompressImage';
 import ImageToIco from './pages/tools/image/ImageToIco';
+import ImageFilters from './pages/tools/image/ImageFilters';
 
 // Audio Tools
 import TrimAudio from './pages/tools/audio/TrimAudio';
@@ -26,6 +30,20 @@ import MergeAudio from './pages/tools/audio/MergeAudio';
 import VolumeBooster from './pages/tools/audio/VolumeBooster';
 import AudioCompressor from './pages/tools/audio/AudioCompressor';
 import Mp3Converter from './pages/tools/audio/Mp3Converter';
+
+// Text Tools
+import TextCaseConverter from './pages/tools/text/TextCaseConverter';
+import CsvJsonConverter from './pages/tools/text/CsvJsonConverter';
+
+// Security Tools
+import HashGenerator from './pages/tools/security/HashGenerator';
+import JwtDecoder from './pages/tools/security/JwtDecoder';
+
+// Developer Tools
+import ColorConverter from './pages/tools/developer/ColorConverter';
+
+// Creative Tools
+import CssGenerators from './pages/tools/creative/CssGenerators';
 
 // Utility Tools
 import QrGenerator from './pages/tools/utilities/QrGenerator';
@@ -36,6 +54,8 @@ import TimestampConverter from './pages/tools/utilities/TimestampConverter';
 import JsonFormatter from './pages/tools/utilities/JsonFormatter';
 import WordCounter from './pages/tools/utilities/WordCounter';
 import TextCompare from './pages/tools/utilities/TextCompare';
+import UnitConverter from './pages/tools/utilities/UnitConverter';
+import CalculatorsSuite from './pages/tools/utilities/CalculatorsSuite';
 
 export default function App() {
   return (
@@ -54,6 +74,9 @@ export default function App() {
             <Route path="/tools/pdf-to-images" element={<PdfToImages />} />
             <Route path="/tools/unlock-pdf" element={<UnlockPdf />} />
             <Route path="/tools/watermark-pdf" element={<RotatePdf />} />
+            <Route path="/tools/pdf-page-numbering" element={<PdfPageNumbering />} />
+            <Route path="/tools/delete-pdf-pages" element={<DeletePdfPages />} />
+            <Route path="/tools/protect-pdf" element={<ProtectPdf />} />
 
             {/* Image Tools */}
             <Route path="/tools/ai-image-upscaler" element={<AiImageUpscaler />} />
@@ -65,6 +88,7 @@ export default function App() {
             <Route path="/tools/crop-image" element={<CropImage />} />
             <Route path="/tools/compress-image" element={<CompressImage />} />
             <Route path="/tools/image-to-ico" element={<ImageToIco />} />
+            <Route path="/tools/image-filters" element={<ImageFilters />} />
 
             {/* Audio Tools */}
             <Route path="/tools/trim-audio" element={<TrimAudio />} />
@@ -73,6 +97,20 @@ export default function App() {
             <Route path="/tools/audio-compressor" element={<AudioCompressor />} />
             <Route path="/tools/mp3-converter" element={<Mp3Converter />} />
             <Route path="/tools/extract-audio" element={<Mp3Converter />} />
+
+            {/* Text Tools */}
+            <Route path="/tools/text-case-converter" element={<TextCaseConverter />} />
+            <Route path="/tools/csv-json-converter" element={<CsvJsonConverter />} />
+
+            {/* Security Tools */}
+            <Route path="/tools/hash-generator" element={<HashGenerator />} />
+            <Route path="/tools/jwt-decoder" element={<JwtDecoder />} />
+
+            {/* Developer Tools */}
+            <Route path="/tools/color-converter" element={<ColorConverter />} />
+
+            {/* Creative Tools */}
+            <Route path="/tools/css-generators" element={<CssGenerators />} />
 
             {/* Utility Tools */}
             <Route path="/tools/qr-generator" element={<QrGenerator />} />
@@ -83,6 +121,8 @@ export default function App() {
             <Route path="/tools/json-formatter" element={<JsonFormatter />} />
             <Route path="/tools/word-counter" element={<WordCounter />} />
             <Route path="/tools/text-compare" element={<TextCompare />} />
+            <Route path="/tools/unit-converter" element={<UnitConverter />} />
+            <Route path="/tools/calculators" element={<CalculatorsSuite />} />
 
             {/* Video Tools */}
             <Route path="/tools/video-downloader" element={<VideoDownloader />} />
